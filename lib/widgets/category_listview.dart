@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:news_app/model/category.dart';
-
 import 'category_item.dart';
+
 class CategoryListview extends StatelessWidget {
   final void Function(String categoryName) onCategoryTap;
+
   const CategoryListview({super.key, required this.onCategoryTap});
 
   @override
@@ -23,4 +24,3 @@ class CategoryListview extends StatelessWidget {
     );
   }
 }
-
