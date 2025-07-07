@@ -4,8 +4,13 @@ import 'category_item.dart';
 
 class CategoryListview extends StatelessWidget {
   final void Function(String categoryName) onCategoryTap;
+  final String selectedCategory;
 
-  const CategoryListview({super.key, required this.onCategoryTap});
+  const CategoryListview({
+    super.key,
+    required this.onCategoryTap,
+    required this.selectedCategory,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +20,10 @@ class CategoryListview extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: newsCategory.length,
         itemBuilder: (context, index) {
+          final category = newsCategory[index];
           return CategoryItem(
-            category: newsCategory[index],
+            category: category,
+            isSelected: category.name.toLowerCase() == selectedCategory,
             onTap: onCategoryTap,
           );
         },

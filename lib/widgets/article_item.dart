@@ -14,6 +14,8 @@ class _ArticleItemState extends State<ArticleItem> {
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = widget.article.image ??
+        "https://via.placeholder.com/300x200";
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Column(
@@ -24,11 +26,8 @@ class _ArticleItemState extends State<ArticleItem> {
             height: 200,
             decoration: BoxDecoration(
               image: DecorationImage(
-                fit: BoxFit.fill,
-                image: NetworkImage(
-                  widget.article.image ??
-                      "no photo",
-                ),
+                fit: BoxFit.cover,
+                image: NetworkImage(imageUrl),
               ),
               borderRadius: const BorderRadius.only(
                 topRight: Radius.circular(20),
@@ -47,16 +46,15 @@ class _ArticleItemState extends State<ArticleItem> {
               child: Text(
                 widget.article.description ?? '',
                 maxLines: showFullText ? null : 2,
-                overflow: showFullText
-                    ? TextOverflow.visible
-                    : TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 16),
+                overflow:
+                showFullText ? TextOverflow.visible : TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 16),
               ),
             ),
           ),
           Text(
             widget.article.title,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
           ),
         ],
       ),

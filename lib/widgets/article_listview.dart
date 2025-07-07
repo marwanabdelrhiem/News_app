@@ -11,30 +11,34 @@ class ArticleListview extends StatefulWidget {
 }
 
 class _ArticleListviewState extends State<ArticleListview> {
-  List<Article>? finalList;
+  List<Article>? articles;
 
   @override
   void initState() {
-    getNews();
     super.initState();
+    fetchNews();
   }
 
-  getNews() async {
-    ApiService apiService = ApiService();
-    finalList = await apiService.getNews();
-    setState(() {});
+  Future<void> fetchNews() async {
+    final apiService = ApiService();
+    final data = await apiService.getNews();
+    setState(() {
+      articles = data;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return finalList == null
-        ? SliverToBoxAdapter(
-      child: Center(child: CircularProgressIndicator()),
-    )
-        : SliverList(
+    if (articles == null) {
+      return const SliverToBoxAdapter(
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return SliverList(
       delegate: SliverChildBuilderDelegate(
-            (context, index) => ArticleItem(article: finalList![index],),
-        childCount: finalList!.length,
+            (context, index) => ArticleItem(article: articles![index]),
+        childCount: articles!.length,
       ),
     );
   }

@@ -1,12 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:news_app/cubit/news_cubit.dart';
-import 'package:news_app/cubit/news_state.dart';
+import 'package:news_app/model/article.dart';
+import 'package:news_app/network/api_service.dart';
 import 'package:news_app/widgets/article_item.dart';
 import 'package:news_app/widgets/category_listview.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  List<Article>? articles;
+  String selectedCategory = "general";
+
+  @override
+  void initState() {
+    super.initState();
+    getNews();
+  }
+
+  Future<void> getNews([String? category]) async {
+    final apiService = ApiService();
+    articles = await apiService.getNews(category ?? selectedCategory);
+    setState(() {});
+  }
+
+  void handleCategoryTap(String categoryName) {
+    if (categoryName.toLowerCase() != selectedCategory) {
+      selectedCategory = categoryName.toLowerCase();
+      getNews(selectedCategory);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,67 +43,41 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              // TODO: ممكن تضيف شاشة بحث هنا لاحقاً
+
             },
             icon: const Icon(Icons.search),
           ),
         ],
       ),
-      body: BlocBuilder<NewsCubit, NewsState>(
-        builder: (context, state) {
-          if (state is NewsLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          else if (state is NewsSuccess) {
-            return CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: CategoryListview(
-                    onCategoryTap: (category) {
-                      // تحميل الأخبار حسب الفئة المختارة
-                      if (category.toLowerCase() != state.selectedCategory) {
-                        context.read<NewsCubit>().fetchNews(category);
-                      }
-                    },
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Text(
-                      "${state.selectedCategory.toUpperCase()} News",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                      return ArticleItem(article: state.articles[index]);
-                    },
-                    childCount: state.articles.length,
-                  ),
-                ),
-              ],
-            );
-          }
-
-          else if (state is NewsError) {
-            return Center(
+      body: articles == null
+          ? const Center(child: CircularProgressIndicator())
+          : CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: CategoryListview(
+              onCategoryTap: handleCategoryTap,
+              selectedCategory: selectedCategory,
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
               child: Text(
-                "حدث خطأ: ${state.errorMessage}",
-                style: const TextStyle(color: Colors.red),
+                "${selectedCategory.toUpperCase()} News",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
-            );
-          }
-
-          // في حالة NewsInitial
-          return const SizedBox();
-        },
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+                  (context, index) => ArticleItem(article: articles![index]),
+              childCount: articles!.length,
+            ),
+          ),
+        ],
       ),
     );
   }
